@@ -1,6 +1,7 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -50,15 +51,23 @@ const SkySerialGenerator = ({
       </Select>
 
       {type === "SKY17" && onDeviceTypeChange && (
-        <Select value={deviceType} onValueChange={onDeviceTypeChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select device type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Glass">Glass</SelectItem>
-            <SelectItem value="Puck">Puck</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="space-y-2">
+          <Label>Device Type</Label>
+          <RadioGroup
+            value={deviceType}
+            onValueChange={onDeviceTypeChange}
+            className="flex space-x-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="Glass" id="glass" />
+              <Label htmlFor="glass">Glass</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="Puck" id="puck" />
+              <Label htmlFor="puck">Puck</Label>
+            </div>
+          </RadioGroup>
+        </div>
       )}
 
       <div className="flex items-center space-x-2">
@@ -68,6 +77,7 @@ const SkySerialGenerator = ({
           value={prefix}
           onChange={(e) => onPrefixChange(e.target.value)}
           placeholder="Optional prefix"
+          disabled={type === "SKY17"}
         />
       </div>
     </div>
