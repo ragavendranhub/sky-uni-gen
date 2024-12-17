@@ -23,9 +23,9 @@ const PATTERNS = {
   MAC16: /^[0-9A-Fa-f]{16}$/,
   NDS: /^[A-F0-9]{16}$/,
   SAGEM10: /^[A-Z]{2}[A-F0-9]{8}$/,
-  SKY14: /^([A-Z0-9]{4})([0-9]{2})([0-C]{1})([0-E]{1})([0-9]{6})+$/,
+  SKY14: /^([A-Z0-9]{4})([0-9]{2})([0-C]{1})([0-E]{1})([0-9]{6})$/,
   SKY17: /^[A-Z]{2}[A-Z0-9]{2}[A-Z]{2}[A-Z0-9][0-9]{2}([0-4][0-9]|5[0-3])[A-F0-9]{5}[A-Z0-9]$/,
-  SKY9: /^[D]([0-9]{8})+$/,
+  SKY9: /^[D]([0-9]{8})$/,
 };
 
 const LENGTHS = {
@@ -77,7 +77,28 @@ export const generateUUID = () => {
   });
 };
 
-export const generateSkySerial = (type: SkySerialType, prefix: string = "") => {
+const generateSky17Value = (deviceType?: "Glass" | "Puck") => {
+  const prefix = deviceType === "Glass" ? "LT02SK7" : deviceType === "Puck" ? "IP02SK7" : "";
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const remainingLength = 17 - prefix.length;
+  let result = prefix;
+
+  for (let i = 0; i < remainingLength; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+
+  return result;
+};
+
+export const generateSkySerial = (
+  type: SkySerialType,
+  prefix: string = "",
+  deviceType?: "Glass" | "Puck"
+) => {
+  if (type === "SKY17" && deviceType) {
+    return generateSky17Value(deviceType);
+  }
+
   const pattern = PATTERNS[type];
   const length = LENGTHS[type];
 
@@ -88,36 +109,41 @@ export const generateSkySerial = (type: SkySerialType, prefix: string = "") => {
 
   if (remainingLength <= 0) return "";
 
-  // Generate random characters based on the pattern
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const numericChars = "0123456789";
   const hexChars = "0123456789ABCDEF";
 
-  for (let i = 0; i < remainingLength; i++) {
-    switch (type) {
-      case "IMEI":
-      case "EID":
-        result += numericChars[Math.floor(Math.random() * numericChars.length)];
-        break;
-      case "ICCID":
-        if (result.length === 0) result = "89";
-        else
-          result += numericChars[Math.floor(Math.random() * numericChars.length)];
-        break;
-      case "SKY9":
-        if (result.length === 0) result = "D";
-        else
-          result += numericChars[Math.floor(Math.random() * numericChars.length)];
-        break;
-      case "MAC12":
-      case "MAC16":
-      case "MAC12OR16":
-      case "NDS":
-        result += hexChars[Math.floor(Math.random() * hexChars.length)];
-        break;
-      default:
-        result += chars[Math.floor(Math.random() * chars.length)];
-    }
+  switch (type) {
+    case "IMEI":
+    case "EID":
+      result = result.padEnd(length, "0");
+      break;
+    case "ICCID":
+      result = "89" + result;
+      result = result.padEnd(length, "0");
+      break;
+    case "SKY9":
+      result = "D" + result;
+      result = result.padEnd(length, "0");
+      break;
+    case "SKY14":
+      // Format: [A-Z0-9]{4}[0-9]{2}[0-C][0-E][0-9]{6}
+      if (!result) {
+        result = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+        result += Array.from({ length: 2 }, () => numericChars[Math.floor(Math.random() * numericChars.length)]).join("");
+        result += String.fromCharCode(65 + Math.floor(Math.random() * 3)); // 0-C (A-C)
+        result += String.fromCharCode(65 + Math.floor(Math.random() * 5)); // 0-E (A-E)
+        result += Array.from({ length: 6 }, () => numericChars[Math.floor(Math.random() * numericChars.length)]).join("");
+      }
+      break;
+    case "MAC12":
+    case "MAC16":
+    case "MAC12OR16":
+    case "NDS":
+      result = result.padEnd(length, "0");
+      break;
+    default:
+      result = result.padEnd(length, "A");
   }
 
   // Validate against pattern

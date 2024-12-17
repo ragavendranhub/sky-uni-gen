@@ -3,14 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   GeneratorType,
@@ -19,6 +11,8 @@ import {
   generateUUID,
   generateSkySerial,
 } from "@/utils/generators";
+import RandomGenerator from "./generators/RandomGenerator";
+import SkySerialGenerator from "./generators/SkySerialGenerator";
 
 const Generator = () => {
   const [type, setType] = useState<GeneratorType>("random");
@@ -30,6 +24,7 @@ const Generator = () => {
   const [length, setLength] = useState(12);
   const [skySerialType, setSkySerialType] = useState<SkySerialType>("IMEI");
   const [prefix, setPrefix] = useState("");
+  const [deviceType, setDeviceType] = useState<"Glass" | "Puck">();
   const [quantity, setQuantity] = useState(1);
   const [generatedValues, setGeneratedValues] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -49,7 +44,7 @@ const Generator = () => {
             value = generateUUID();
             break;
           case "skySerials":
-            value = generateSkySerial(skySerialType, prefix);
+            value = generateSkySerial(skySerialType, prefix, deviceType);
             break;
         }
         values.push(value);
@@ -58,6 +53,7 @@ const Generator = () => {
       toast.success("Values generated successfully!");
     } catch (error) {
       toast.error("Error generating values");
+      console.error(error);
     } finally {
       setIsGenerating(false);
     }
@@ -92,97 +88,25 @@ const Generator = () => {
 
         <div className="space-y-4">
           {type === "random" && (
-            <div className="space-y-4">
-              <div className="flex space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="alpha"
-                    checked={randomOptions.alpha}
-                    onCheckedChange={(checked) =>
-                      setRandomOptions((prev) => ({
-                        ...prev,
-                        alpha: checked === true,
-                      }))
-                    }
-                  />
-                  <Label htmlFor="alpha">Alphabets</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="numeric"
-                    checked={randomOptions.numeric}
-                    onCheckedChange={(checked) =>
-                      setRandomOptions((prev) => ({
-                        ...prev,
-                        numeric: checked === true,
-                      }))
-                    }
-                  />
-                  <Label htmlFor="numeric">Numerical</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="special"
-                    checked={randomOptions.special}
-                    onCheckedChange={(checked) =>
-                      setRandomOptions((prev) => ({
-                        ...prev,
-                        special: checked === true,
-                      }))
-                    }
-                  />
-                  <Label htmlFor="special">Special</Label>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="length">Length:</Label>
-                <Input
-                  id="length"
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={length}
-                  onChange={(e) => setLength(parseInt(e.target.value) || 1)}
-                  className="w-24"
-                />
-              </div>
-            </div>
+            <RandomGenerator
+              options={randomOptions}
+              length={length}
+              onOptionsChange={setRandomOptions}
+              onLengthChange={setLength}
+            />
           )}
 
           {type === "skySerials" && (
-            <div className="space-y-4">
-              <Select
-                value={skySerialType}
-                onValueChange={(value) => setSkySerialType(value as SkySerialType)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="IMEI">IMEI (15)</SelectItem>
-                  <SelectItem value="NDS">NDS (16)</SelectItem>
-                  <SelectItem value="SKY9">SKY9 (9)</SelectItem>
-                  <SelectItem value="SKY14">SKY14 (14)</SelectItem>
-                  <SelectItem value="SKY17">SKY17 (17)</SelectItem>
-                  <SelectItem value="SAGEM10">SAGEM10 (10)</SelectItem>
-                  <SelectItem value="ICCID">ICCID (20)</SelectItem>
-                  <SelectItem value="EID">EID (32)</SelectItem>
-                  <SelectItem value="DEVICE_APPLE">DEVICE_APPLE (12)</SelectItem>
-                  <SelectItem value="MAC12">MAC12 (12)</SelectItem>
-                  <SelectItem value="MAC16">MAC16 (16)</SelectItem>
-                  <SelectItem value="MAC12OR16">MAC12OR16 (16)</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="prefix">Prefix:</Label>
-                <Input
-                  id="prefix"
-                  value={prefix}
-                  onChange={(e) => setPrefix(e.target.value)}
-                  placeholder="Optional prefix"
-                />
-              </div>
-            </div>
+            <SkySerialGenerator
+              type={skySerialType}
+              prefix={prefix}
+              deviceType={deviceType}
+              onTypeChange={setSkySerialType}
+              onPrefixChange={setPrefix}
+              onDeviceTypeChange={
+                skySerialType === "SKY17" ? setDeviceType : undefined
+              }
+            />
           )}
         </div>
 
