@@ -43,6 +43,65 @@ const LENGTHS = {
   MAC12OR16: 16,
 };
 
+const CODE_POINTS: { [key: string]: number } = {
+  '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+  'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15, 'G': 16, 'H': 17,
+  'I': 18, 'J': 19, 'K': 20, 'L': 21, 'M': 22, 'N': 23, 'O': 24, 'P': 25,
+  'Q': 26, 'R': 27, 'S': 28, 'T': 29, 'U': 30, 'V': 31, 'W': 32, 'X': 33,
+  'Y': 34, 'Z': 35
+};
+
+const REVERSE_CODE_POINTS: { [key: number]: string } = Object.entries(CODE_POINTS)
+  .reduce((acc, [char, value]) => ({ ...acc, [value]: char }), {});
+
+const calculateLuhnChecksum = (value: string): string => {
+  // Map characters to code points
+  const codePoints = value.split('').map(char => CODE_POINTS[char] || 0);
+  
+  // Calculate sum according to Luhn algorithm with custom rules
+  let sum = 0;
+  for (let i = 0; i < codePoints.length; i++) {
+    let num = codePoints[i];
+    // Multiply by 2 if in even position
+    if (i % 2 === 0) {
+      num *= 2;
+    }
+    // Apply the rule for values > 36
+    if (num > 36) {
+      num = 1 + (num - 36);
+    }
+    sum += num;
+  }
+
+  // Calculate final checksum
+  let checksumValue = sum % 36;
+  checksumValue = 36 - checksumValue;
+  if (checksumValue === 36) {
+    checksumValue = 0;
+  }
+
+  // Convert back to character
+  return REVERSE_CODE_POINTS[checksumValue];
+};
+
+const generateSky17Value = (deviceType?: "Glass" | "Puck") => {
+  const prefix = deviceType === "Glass" ? "LT02SK7" : deviceType === "Puck" ? "IP02SK7" : "";
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const remainingLength = 16 - prefix.length; // We reserve one position for checksum
+  let result = prefix;
+
+  // Generate the main part of the serial
+  for (let i = 0; i < remainingLength; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+
+  // Calculate and append the Luhn checksum
+  const checksum = calculateLuhnChecksum(result);
+  result += checksum;
+
+  return result;
+};
+
 const generateRandomChar = (type: "alpha" | "numeric" | "special") => {
   const chars = {
     alpha: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
@@ -75,19 +134,6 @@ export const generateUUID = () => {
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
-};
-
-const generateSky17Value = (deviceType?: "Glass" | "Puck") => {
-  const prefix = deviceType === "Glass" ? "LT02SK7" : deviceType === "Puck" ? "IP02SK7" : "";
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  const remainingLength = 17 - prefix.length;
-  let result = prefix;
-
-  for (let i = 0; i < remainingLength; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-
-  return result;
 };
 
 export const generateSkySerial = (
