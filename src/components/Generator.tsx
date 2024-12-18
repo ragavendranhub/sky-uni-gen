@@ -115,16 +115,18 @@ export const Generator = () => {
           )}
 
           {type === "skySerials" && (
-            <SkySerialGenerator
-              type={skySerialType}
-              prefix={prefix}
-              deviceType={deviceType}
-              customPrefix={customPrefix}
-              onTypeChange={setSkySerialType}
-              onPrefixChange={setPrefix}
-              onDeviceTypeChange={setDeviceType}
-              onCustomPrefixChange={setCustomPrefix}
-            />
+            <div className="relative z-50">
+              <SkySerialGenerator
+                type={skySerialType}
+                prefix={prefix}
+                deviceType={deviceType}
+                customPrefix={customPrefix}
+                onTypeChange={setSkySerialType}
+                onPrefixChange={setPrefix}
+                onDeviceTypeChange={setDeviceType}
+                onCustomPrefixChange={setCustomPrefix}
+              />
+            </div>
           )}
         </div>
 
