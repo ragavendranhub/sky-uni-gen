@@ -75,36 +75,36 @@ export const Generator = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-8">
+    <div className="max-w-2xl mx-auto space-y-8">
       <div className="space-y-4">
         <Tabs 
           value={type} 
           onValueChange={(value) => setType(value as GeneratorType)} 
           className="w-full"
         >
-          <TabsList className="w-full h-14 bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg rounded-lg">
+          <TabsList className="w-full h-14 bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg rounded-lg">
             <TabsTrigger 
               value="random" 
-              className="flex-1 text-lg font-semibold hover:bg-white/20 transition-all duration-200"
+              className="flex-1 text-lg font-semibold text-white hover:bg-white/20 transition-all duration-200"
             >
               Random
             </TabsTrigger>
             <TabsTrigger 
               value="uuid" 
-              className="flex-1 text-lg font-semibold hover:bg-white/20 transition-all duration-200"
+              className="flex-1 text-lg font-semibold text-white hover:bg-white/20 transition-all duration-200"
             >
               UUID
             </TabsTrigger>
             <TabsTrigger 
               value="skySerials" 
-              className="flex-1 text-lg font-semibold hover:bg-white/20 transition-all duration-200"
+              className="flex-1 text-lg font-semibold text-white hover:bg-white/20 transition-all duration-200"
             >
               Sky Serials
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <div className="space-y-4 bg-white/5 backdrop-blur-md p-6 rounded-lg border border-white/10 shadow-xl">
+        <div className="space-y-4 bg-white/10 backdrop-blur-xl p-6 rounded-lg border border-white/20 shadow-xl">
           {type === "random" && (
             <RandomGenerator
               options={randomOptions}
@@ -128,8 +128,8 @@ export const Generator = () => {
           )}
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="quantity">Quantity:</Label>
+        <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-xl p-4 rounded-lg border border-white/20">
+          <Label htmlFor="quantity" className="text-white">Quantity:</Label>
           <Input
             id="quantity"
             type="number"
@@ -137,14 +137,14 @@ export const Generator = () => {
             max={100}
             value={quantity}
             onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-            className="w-24"
+            className="w-24 bg-white/20 border-white/20 text-white"
           />
         </div>
 
         <Button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className="w-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-200"
+          className="w-full bg-white/20 backdrop-blur-xl hover:bg-white/30 text-white border border-white/20 transition-all duration-200"
         >
           {isGenerating ? "Generating..." : "Generate"}
         </Button>
@@ -155,12 +155,12 @@ export const Generator = () => {
               item.visible && (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-2 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10"
+                  className="flex items-center justify-between p-4 bg-white/10 backdrop-blur-xl rounded-lg border border-white/20"
                 >
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <code className="text-sm">{item.value}</code>
+                        <code className="text-sm text-white">{item.value}</code>
                       </TooltipTrigger>
                       <TooltipContent>
                         Length: {item.value.length}
@@ -171,7 +171,7 @@ export const Generator = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => copyToClipboard(item.value, index)}
-                    className="hover:bg-white/10"
+                    className="text-white hover:bg-white/20"
                   >
                     Copy
                   </Button>
