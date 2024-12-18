@@ -20,7 +20,7 @@ import {
 import RandomGenerator from "./generators/RandomGenerator";
 import SkySerialGenerator from "./generators/SkySerialGenerator";
 
-const Generator = () => {
+export const Generator = () => {
   const [type, setType] = useState<GeneratorType>("random");
   const [randomOptions, setRandomOptions] = useState({
     alpha: true,
@@ -184,5 +184,3 @@ const Generator = () => {
     </div>
   );
 };
-
-export default Generator;

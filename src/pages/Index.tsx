@@ -1,3 +1,5 @@
+import { Generator } from "@/components/Generator";
+
 const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/20 via-slate-900/20 to-blue-900/20">
