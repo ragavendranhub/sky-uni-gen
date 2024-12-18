@@ -12,29 +12,17 @@ const generateRandomChar = (charset: string) => {
   return charset[Math.floor(Math.random() * charset.length)];
 };
 
-const generatePatternBasedValue = (pattern: RegExp, length: number): string => {
-  let result = '';
-  
-  if (pattern.toString().includes('[0-9]')) {
-    result = Array(length).fill('0').join('');
-  } else if (pattern.toString().includes('[A-Z]')) {
-    result = Array(length).fill('A').join('');
-  } else if (pattern.toString().includes('[A-F]')) {
-    result = Array(length).fill('A').join('');
-  } else {
-    result = Array(length).fill('0').join('');
-  }
-  
-  return result;
-};
-
 export const generateSkySerial = (
   type: SkySerialType,
   prefix: string = "",
   deviceType?: "Glass" | "Puck"
 ): string => {
   if (type === "SKY17" && deviceType) {
-    return generateSky17Value(deviceType);
+    const prefixMap = {
+      "Glass": "LT02SK7",
+      "Puck": "IP0CSK5"
+    };
+    return generateSky17Value(prefixMap[deviceType]);
   }
 
   const pattern = PATTERNS[type];
@@ -50,20 +38,18 @@ export const generateSkySerial = (
   switch (type) {
     case "SKY14":
       if (!result) {
-        result = Array.from({ length: 4 }, () => ALPHANUM_CHARS[Math.floor(Math.random() * ALPHANUM_CHARS.length)]).join("");
-        result += Array.from({ length: 2 }, () => NUMERIC_CHARS[Math.floor(Math.random() * NUMERIC_CHARS.length)]).join("");
+        result = Array.from({ length: 4 }, () => generateRandomChar(ALPHANUM_CHARS)).join("");
+        result += Array.from({ length: 2 }, () => generateRandomChar(NUMERIC_CHARS)).join("");
         result += String.fromCharCode(65 + Math.floor(Math.random() * 3)); // 0-C (A-C)
         result += String.fromCharCode(65 + Math.floor(Math.random() * 5)); // 0-E (A-E)
-        result += Array.from({ length: 6 }, () => NUMERIC_CHARS[Math.floor(Math.random() * NUMERIC_CHARS.length)]).join("");
+        result += Array.from({ length: 6 }, () => generateRandomChar(NUMERIC_CHARS)).join("");
       }
       break;
     case "ICCID":
-      result = "89" + result;
-      result = result.padEnd(length, "0");
+      result = "89" + Array.from({ length: remainingLength - 2 }, () => generateRandomChar(NUMERIC_CHARS)).join("");
       break;
     case "SKY9":
-      result = "D" + result;
-      result = result.padEnd(length, "0");
+      result = "D" + Array.from({ length: remainingLength - 1 }, () => generateRandomChar(NUMERIC_CHARS)).join("");
       break;
     case "SAGEM10":
       result = Array.from({ length: 2 }, () => generateRandomChar(ALPHA_CHARS)).join('') +
@@ -81,20 +67,17 @@ export const generateSkySerial = (
       result = Array.from({ length: remainingLength }, () => generateRandomChar(ALPHANUM_CHARS)).join('');
       break;
     case "EID":
-      result = Array.from({ length: remainingLength }, () => generateRandomChar(NUMERIC_CHARS)).join('');
-      break;
     case "IMEI":
       result = Array.from({ length: remainingLength }, () => generateRandomChar(NUMERIC_CHARS)).join('');
       break;
     default:
-      result = result + generatePatternBasedValue(pattern, remainingLength);
+      result = result + Array.from({ length: remainingLength }, () => generateRandomChar(NUMERIC_CHARS)).join('');
   }
 
   return result;
 };
 
-const generateSky17Value = (deviceType: "Glass" | "Puck"): string => {
-  const prefix = deviceType === "Glass" ? "LT02SK7" : "IP02SK7";
+const generateSky17Value = (prefix: string): string => {
   const remainingLength = 16 - prefix.length; // We reserve one position for checksum
   let result = prefix;
 
