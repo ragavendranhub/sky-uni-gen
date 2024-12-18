@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import {
   GeneratorType,
@@ -26,12 +32,12 @@ const Generator = () => {
   const [prefix, setPrefix] = useState("");
   const [deviceType, setDeviceType] = useState<"Glass" | "Puck">();
   const [quantity, setQuantity] = useState(1);
-  const [generatedValues, setGeneratedValues] = useState<string[]>([]);
+  const [generatedValues, setGeneratedValues] = useState<Array<{value: string, visible: boolean}>>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = () => {
     setIsGenerating(true);
-    const values: string[] = [];
+    const values: Array<{value: string, visible: boolean}> = [];
 
     try {
       for (let i = 0; i < quantity; i++) {
@@ -47,7 +53,7 @@ const Generator = () => {
             value = generateSkySerial(skySerialType, prefix, deviceType);
             break;
         }
-        values.push(value);
+        values.push({ value, visible: true });
       }
       setGeneratedValues(values);
       toast.success("Values generated successfully!");
@@ -59,32 +65,30 @@ const Generator = () => {
     }
   };
 
-  const copyToClipboard = (value: string) => {
+  const copyToClipboard = (value: string, index: number) => {
     navigator.clipboard.writeText(value);
     toast.success("Copied to clipboard!");
+    const newValues = [...generatedValues];
+    newValues[index].visible = false;
+    setGeneratedValues(newValues);
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-8">
       <div className="space-y-4">
-        <RadioGroup
-          value={type}
-          onValueChange={(value) => setType(value as GeneratorType)}
-          className="flex space-x-4"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="random" id="random" />
-            <Label htmlFor="random">Random</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="uuid" id="uuid" />
-            <Label htmlFor="uuid">UUID</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="skySerials" id="skySerials" />
-            <Label htmlFor="skySerials">Sky Serials</Label>
-          </div>
-        </RadioGroup>
+        <Tabs value={type} onValueChange={(value) => setType(value as GeneratorType)} className="w-full">
+          <TabsList className="w-full h-14 bg-primary">
+            <TabsTrigger value="random" className="flex-1 text-lg font-semibold">
+              Random
+            </TabsTrigger>
+            <TabsTrigger value="uuid" className="flex-1 text-lg font-semibold">
+              UUID
+            </TabsTrigger>
+            <TabsTrigger value="skySerials" className="flex-1 text-lg font-semibold">
+              Sky Serials
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <div className="space-y-4">
           {type === "random" && (
@@ -133,20 +137,31 @@ const Generator = () => {
 
         {generatedValues.length > 0 && (
           <div className="space-y-2">
-            {generatedValues.map((value, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 bg-secondary rounded"
-              >
-                <code className="text-sm">{value}</code>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(value)}
+            {generatedValues.map((item, index) => (
+              item.visible && (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-2 bg-secondary rounded"
                 >
-                  Copy
-                </Button>
-              </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <code className="text-sm">{item.value}</code>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Length: {item.value.length}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(item.value, index)}
+                  >
+                    Copy
+                  </Button>
+                </div>
+              )
             ))}
           </div>
         )}
